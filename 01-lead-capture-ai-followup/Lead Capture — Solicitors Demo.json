@@ -1,0 +1,630 @@
+{
+  "name": "Lead Capture — Solicitors Demo",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Free Legal Consultation Request",
+        "formDescription": "Fill in your details and we will call you back within 24 hours",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Full Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email Address",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Phone Number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Brief Description of Your Matter",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -432,
+        -48
+      ],
+      "id": "3b1a8884-eb0a-4c30-8cde-66d3c01b545c",
+      "name": "On form submission- Receive Lead",
+      "webhookId": "8d11575a-5700-436e-be39-3c28feb08179"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "16Uj8u4KqGT3SSzC5USC9FLFSokmqvgo-sGoOLol7cfE",
+          "mode": "list",
+          "cachedResultName": "Leads Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16Uj8u4KqGT3SSzC5USC9FLFSokmqvgo-sGoOLol7cfE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16Uj8u4KqGT3SSzC5USC9FLFSokmqvgo-sGoOLol7cfE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Full Name": "={{ $json['Full Name'] }}",
+            "Email": "={{ $json['Email Address'] }}",
+            "Phone": "={{ $json['Phone Number'] }}",
+            "Message": "={{ $json['Brief Description of Your Matter'] }}",
+            "Status": "New",
+            "Timestamp": "={{ $now.setZone('Africa/Lagos').toFormat('yyyy-MM-dd HH:mm') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Follow Up Sent",
+              "displayName": "Follow Up Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -208,
+        -48
+      ],
+      "id": "959346b4-30a2-42cb-8b32-4b9106420f68",
+      "name": "Log New Lead",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YfI8EKJbdWJDB1K9",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ogunleyeabiodunb@gmail.com",
+        "subject": "=New Enquiry from {{ $json['Full Name'] }}",
+        "message": "=<div style=\"font-family: Arial, sans-serif; font-size: 15px; color: #333;\">\n\n  <h2 style=\"color: #1a73e8;\">New Enquiry Received</h2>\n  \n  <p>You have a new enquiry from your website. Please follow up as soon as possible.</p>\n\n  <table style=\"border-collapse: collapse; width: 100%;\">\n    <tr style=\"background-color: #f5f5f5;\">\n      <td style=\"padding: 10px; font-weight: bold; width: 140px;\">Full Name</td>\n      <td style=\"padding: 10px;\">{{ $json['Full Name'] }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding: 10px; font-weight: bold;\">Email</td>\n      <td style=\"padding: 10px;\"> {{ $json.Email }}\n</td>\n    </tr>\n    <tr style=\"background-color: #f5f5f5;\">\n      <td style=\"padding: 10px; font-weight: bold;\">Phone</td>\n      <td style=\"padding: 10px;\"> {{ $json.Phone }}\n</td>\n    </tr>\n    <tr>\n      <td style=\"padding: 10px; font-weight: bold;\">Message</td>\n      <td style=\"padding: 10px;\"> {{ $json.Message }}\n</td>\n    </tr>\n    <tr style=\"background-color: #f5f5f5;\">\n      <td style=\"padding: 10px; font-weight: bold;\">Time Received</td>\n      <td style=\"padding: 10px;\">{{ $now.setZone('Africa/Lagos').toFormat('yyyy-MM-dd HH:mm') }}</td>\n    </tr>\n  </table>\n\n  <br>\n  <p style=\"color: #888; font-size: 13px;\">Log into your Leads Tracker to update the status of this lead.</p>\n\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        16,
+        -48
+      ],
+      "id": "49809636-997b-4f2b-8fef-043a41846d05",
+      "name": "Notify Owner",
+      "webhookId": "854660a3-a3b0-4b51-a61c-0a3e98361b88",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3W6hYH3ijBApwS8d",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyBKyQd85DJ2VSdeqirlhv_b2kO0ARLGYJ4",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"You are a professional assistant for a UK solicitors firm. Write a warm, professional and personalised email reply to a new client enquiry. Keep it under 100 words. Do not use placeholders. Sign off as 'The Team'.\\n\\nClient name: {{ $('On form submission- Receive Lead').item.json['Full Name'] }}\\nClient enquiry: {{ $('On form submission- Receive Lead').item.json['Brief Description of Your Matter'] }}\\n\\nWrite only the email body. No subject line.\"\n        }\n      ]\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        240,
+        -48
+      ],
+      "id": "2e0d3fcd-c2e4-42f8-ac44-5a8f82dcf39f",
+      "name": "Gemini — Generate AI Reply"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission- Receive Lead').item.json['Email Address'] }}",
+        "subject": "=Thank you for your enquiry — {{ $('On form submission- Receive Lead').item.json['Full Name'] }}",
+        "message": "=<div style=\"font-family: Arial, sans-serif; font-size: 15px; color: #333; line-height: 1.8; max-width: 600px;\">\n  <p>{{ $json.candidates[0].content.parts[0].text.replace(/\\n\\n/g, '</p><p>').replace(/\\n/g, '<br>') }}</p>\n  <br>\n  <hr style=\"border: none; border-top: 1px solid #eee;\">\n  <p style=\"font-size: 12px; color: #999;\">\n    This is an automated response. Please reply to this email \n    or call us directly if you have any questions.\n  </p>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        -48
+      ],
+      "id": "16a97beb-e1b7-4458-8e07-29e444da1e87",
+      "name": "Send AI Reply to Lead",
+      "webhookId": "fc2d3795-722c-4d62-abfd-14e75912b1ac",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3W6hYH3ijBApwS8d",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "16Uj8u4KqGT3SSzC5USC9FLFSokmqvgo-sGoOLol7cfE",
+          "mode": "list",
+          "cachedResultName": "Leads Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16Uj8u4KqGT3SSzC5USC9FLFSokmqvgo-sGoOLol7cfE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16Uj8u4KqGT3SSzC5USC9FLFSokmqvgo-sGoOLol7cfE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('On form submission- Receive Lead').item.json['Email Address'] }}",
+            "Status": "Contacted"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Follow Up Sent",
+              "displayName": "Follow Up Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        656,
+        -48
+      ],
+      "id": "a0380968-5a0b-48e8-8b1d-b2349d00d52a",
+      "name": "Status: Contacted",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YfI8EKJbdWJDB1K9",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 24,
+        "unit": "hours"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        864,
+        -48
+      ],
+      "id": "17669551-d809-4384-87ea-732e16a770a1",
+      "name": "Wait — 24 Hours",
+      "webhookId": "659cb8d8-7fb7-4de5-a02a-4efdf0c21a15"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission- Receive Lead').item.json['Email Address'] }}",
+        "subject": "=Following up on your enquiry — {{ $('On form submission- Receive Lead').item.json['Full Name'] }}",
+        "message": "=<div style=\"font-family: Arial, sans-serif; font-size: 15px; color: #333; line-height: 1.8; max-width: 600px;\">\n\n  <p>Dear {{ $('On form submission- Receive Lead').item.json['Full Name'] }},</p>\n\n  <p>We wanted to follow up on your recent enquiry with us. We understand you may be busy, and we just wanted to make sure our previous message reached you.</p>\n\n  <p>We are still here and ready to assist you with your legal matter. Please do not hesitate to reply to this email or call us directly at your convenience.</p>\n\n  <p>We look forward to hearing from you.</p>\n\n  <p>Kind regards,<br>The Team</p>\n\n  <hr style=\"border: none; border-top: 1px solid #eee; margin-top: 20px;\">\n  <p style=\"font-size: 12px; color: #999;\">This is an automated follow-up. If you have already been in touch with us, please disregard this message.</p>\n\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1072,
+        -48
+      ],
+      "id": "ad796c2b-b82b-4928-8cbf-6a14dd569100",
+      "name": "Send Follow Up",
+      "webhookId": "b9b53bc4-17a4-4dee-9851-a38a206afd25",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3W6hYH3ijBApwS8d",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "16Uj8u4KqGT3SSzC5USC9FLFSokmqvgo-sGoOLol7cfE",
+          "mode": "list",
+          "cachedResultName": "Leads Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16Uj8u4KqGT3SSzC5USC9FLFSokmqvgo-sGoOLol7cfE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16Uj8u4KqGT3SSzC5USC9FLFSokmqvgo-sGoOLol7cfE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('On form submission- Receive Lead').item.json['Email Address'] }}",
+            "Status": "Followed Up",
+            "Follow Up Sent": "={{ $now.setZone('Africa/Lagos').toFormat('yyyy-MM-dd HH:mm') }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Follow Up Sent",
+              "displayName": "Follow Up Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1280,
+        -48
+      ],
+      "id": "4a016217-4f67-422c-abd6-4a48ae56cc98",
+      "name": "Status: Followed Up",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YfI8EKJbdWJDB1K9",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission- Receive Lead": {
+      "main": [
+        [
+          {
+            "node": "Log New Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log New Lead": {
+      "main": [
+        [
+          {
+            "node": "Notify Owner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Owner": {
+      "main": [
+        [
+          {
+            "node": "Gemini — Generate AI Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini — Generate AI Reply": {
+      "main": [
+        [
+          {
+            "node": "Send AI Reply to Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send AI Reply to Lead": {
+      "main": [
+        [
+          {
+            "node": "Status: Contacted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status: Contacted": {
+      "main": [
+        [
+          {
+            "node": "Wait — 24 Hours",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait — 24 Hours": {
+      "main": [
+        [
+          {
+            "node": "Send Follow Up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Follow Up": {
+      "main": [
+        [
+          {
+            "node": "Status: Followed Up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "ke0zEXshZiOPFsH1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "79bc4988-20d9-4b58-ae3e-fb79f00f4849",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "afcf979e49c9ca50564522db1d64bb4822881cce72e0e4fd5b73cef04a7eb3b2"
+  },
+  "id": "351gL1tDRdZz99Yj",
+  "tags": []
+}
