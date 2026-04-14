@@ -27,7 +27,7 @@ responds to every enquiry within 2 minutes — 24/7 including weekends.
 - Google Sheets (lead tracking)
 
 ## Price Range
-£300 — £500 setup fee
+£150 — £250 setup fee
 
 ## Built By
 Abiodun Ogunleye — AI Automation Specialist
