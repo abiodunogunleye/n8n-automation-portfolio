@@ -29,30 +29,27 @@
       },
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.5,
-      "position": [
-        -432,
-        -48
-      ],
-      "id": "3b1a8884-eb0a-4c30-8cde-66d3c01b545c",
+      "position": [-432, -48],
+      "id": "YOUR_NODE_ID",
       "name": "On form submission- Receive Lead",
-      "webhookId": "8d11575a-5700-436e-be39-3c28feb08179"
+      "webhookId": "YOUR_WEBHOOK_ID"
     },
     {
       "parameters": {
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "16Uj8u4KqGT3SSzC5USC9FLFSokmqvgo-sGoOLol7cfE",
+          "value": "YOUR_SPREADSHEET_ID",
           "mode": "list",
           "cachedResultName": "Leads Tracker",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16Uj8u4KqGT3SSzC5USC9FLFSokmqvgo-sGoOLol7cfE/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Sheet1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16Uj8u4KqGT3SSzC5USC9FLFSokmqvgo-sGoOLol7cfE/edit#gid=0"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit#gid=0"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -66,70 +63,13 @@
           },
           "matchingColumns": [],
           "schema": [
-            {
-              "id": "Full Name",
-              "displayName": "Full Name",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Email",
-              "displayName": "Email",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Phone",
-              "displayName": "Phone",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Timestamp",
-              "displayName": "Timestamp",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Message",
-              "displayName": "Message",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Status",
-              "displayName": "Status",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Follow Up Sent",
-              "displayName": "Follow Up Sent",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            }
+            {"id": "Full Name", "displayName": "Full Name", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true},
+            {"id": "Email", "displayName": "Email", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true},
+            {"id": "Phone", "displayName": "Phone", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true},
+            {"id": "Timestamp", "displayName": "Timestamp", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true},
+            {"id": "Message", "displayName": "Message", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true},
+            {"id": "Status", "displayName": "Status", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true},
+            {"id": "Follow Up Sent", "displayName": "Follow Up Sent", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false}
           ],
           "attemptToConvertTypes": false,
           "convertFieldsToString": false
@@ -138,38 +78,32 @@
       },
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
-      "position": [
-        -208,
-        -48
-      ],
-      "id": "959346b4-30a2-42cb-8b32-4b9106420f68",
+      "position": [-208, -48],
+      "id": "YOUR_NODE_ID_2",
       "name": "Log New Lead",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "YfI8EKJbdWJDB1K9",
+          "id": "YOUR_SHEETS_CREDENTIAL_ID",
           "name": "Google Sheets OAuth2 API"
         }
       }
     },
     {
       "parameters": {
-        "sendTo": "ogunleyeabiodunb@gmail.com",
+        "sendTo": "YOUR_OWNER_EMAIL@gmail.com",
         "subject": "=New Enquiry from {{ $json['Full Name'] }}",
-        "message": "=<div style=\"font-family: Arial, sans-serif; font-size: 15px; color: #333;\">\n\n  <h2 style=\"color: #1a73e8;\">New Enquiry Received</h2>\n  \n  <p>You have a new enquiry from your website. Please follow up as soon as possible.</p>\n\n  <table style=\"border-collapse: collapse; width: 100%;\">\n    <tr style=\"background-color: #f5f5f5;\">\n      <td style=\"padding: 10px; font-weight: bold; width: 140px;\">Full Name</td>\n      <td style=\"padding: 10px;\">{{ $json['Full Name'] }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding: 10px; font-weight: bold;\">Email</td>\n      <td style=\"padding: 10px;\"> {{ $json.Email }}\n</td>\n    </tr>\n    <tr style=\"background-color: #f5f5f5;\">\n      <td style=\"padding: 10px; font-weight: bold;\">Phone</td>\n      <td style=\"padding: 10px;\"> {{ $json.Phone }}\n</td>\n    </tr>\n    <tr>\n      <td style=\"padding: 10px; font-weight: bold;\">Message</td>\n      <td style=\"padding: 10px;\"> {{ $json.Message }}\n</td>\n    </tr>\n    <tr style=\"background-color: #f5f5f5;\">\n      <td style=\"padding: 10px; font-weight: bold;\">Time Received</td>\n      <td style=\"padding: 10px;\">{{ $now.setZone('Africa/Lagos').toFormat('yyyy-MM-dd HH:mm') }}</td>\n    </tr>\n  </table>\n\n  <br>\n  <p style=\"color: #888; font-size: 13px;\">Log into your Leads Tracker to update the status of this lead.</p>\n\n</div>",
+        "message": "=<div style=\"font-family: Arial, sans-serif; font-size: 15px; color: #333;\">\n\n  <h2 style=\"color: #1a73e8;\">New Enquiry Received</h2>\n  \n  <p>You have a new enquiry from your website. Please follow up as soon as possible.</p>\n\n  <table style=\"border-collapse: collapse; width: 100%;\">\n    <tr style=\"background-color: #f5f5f5;\">\n      <td style=\"padding: 10px; font-weight: bold; width: 140px;\">Full Name</td>\n      <td style=\"padding: 10px;\">{{ $json['Full Name'] }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding: 10px; font-weight: bold;\">Email</td>\n      <td style=\"padding: 10px;\">{{ $json.Email }}</td>\n    </tr>\n    <tr style=\"background-color: #f5f5f5;\">\n      <td style=\"padding: 10px; font-weight: bold;\">Phone</td>\n      <td style=\"padding: 10px;\">{{ $json.Phone }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding: 10px; font-weight: bold;\">Message</td>\n      <td style=\"padding: 10px;\">{{ $json.Message }}</td>\n    </tr>\n    <tr style=\"background-color: #f5f5f5;\">\n      <td style=\"padding: 10px; font-weight: bold;\">Time Received</td>\n      <td style=\"padding: 10px;\">{{ $now.setZone('Africa/Lagos').toFormat('yyyy-MM-dd HH:mm') }}</td>\n    </tr>\n  </table>\n\n  <br>\n  <p style=\"color: #888; font-size: 13px;\">Log into your Leads Tracker to update the status of this lead.</p>\n\n</div>",
         "options": {}
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
-      "position": [
-        16,
-        -48
-      ],
-      "id": "49809636-997b-4f2b-8fef-043a41846d05",
+      "position": [16, -48],
+      "id": "YOUR_NODE_ID_3",
       "name": "Notify Owner",
-      "webhookId": "854660a3-a3b0-4b51-a61c-0a3e98361b88",
+      "webhookId": "YOUR_WEBHOOK_ID_2",
       "credentials": {
         "gmailOAuth2": {
-          "id": "3W6hYH3ijBApwS8d",
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
           "name": "Gmail account"
         }
       }
@@ -195,11 +129,8 @@
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [
-        240,
-        -48
-      ],
-      "id": "2e0d3fcd-c2e4-42f8-ac44-5a8f82dcf39f",
+      "position": [240, -48],
+      "id": "YOUR_NODE_ID_4",
       "name": "Gemini — Generate AI Reply"
     },
     {
@@ -211,16 +142,13 @@
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
-      "position": [
-        448,
-        -48
-      ],
-      "id": "16a97beb-e1b7-4458-8e07-29e444da1e87",
+      "position": [448, -48],
+      "id": "YOUR_NODE_ID_5",
       "name": "Send AI Reply to Lead",
-      "webhookId": "fc2d3795-722c-4d62-abfd-14e75912b1ac",
+      "webhookId": "YOUR_WEBHOOK_ID_3",
       "credentials": {
         "gmailOAuth2": {
-          "id": "3W6hYH3ijBApwS8d",
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
           "name": "Gmail account"
         }
       }
@@ -230,17 +158,17 @@
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "16Uj8u4KqGT3SSzC5USC9FLFSokmqvgo-sGoOLol7cfE",
+          "value": "YOUR_SPREADSHEET_ID",
           "mode": "list",
           "cachedResultName": "Leads Tracker",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16Uj8u4KqGT3SSzC5USC9FLFSokmqvgo-sGoOLol7cfE/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Sheet1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16Uj8u4KqGT3SSzC5USC9FLFSokmqvgo-sGoOLol7cfE/edit#gid=0"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit#gid=0"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -248,90 +176,16 @@
             "Email": "={{ $('On form submission- Receive Lead').item.json['Email Address'] }}",
             "Status": "Contacted"
           },
-          "matchingColumns": [
-            "Email"
-          ],
+          "matchingColumns": ["Email"],
           "schema": [
-            {
-              "id": "Full Name",
-              "displayName": "Full Name",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "Email",
-              "displayName": "Email",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Phone",
-              "displayName": "Phone",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "Timestamp",
-              "displayName": "Timestamp",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "Message",
-              "displayName": "Message",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "Status",
-              "displayName": "Status",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Follow Up Sent",
-              "displayName": "Follow Up Sent",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "row_number",
-              "displayName": "row_number",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true,
-              "readOnly": true,
-              "removed": true
-            }
+            {"id": "Full Name", "displayName": "Full Name", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": true},
+            {"id": "Email", "displayName": "Email", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
+            {"id": "Phone", "displayName": "Phone", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": true},
+            {"id": "Timestamp", "displayName": "Timestamp", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": true},
+            {"id": "Message", "displayName": "Message", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": true},
+            {"id": "Status", "displayName": "Status", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true},
+            {"id": "Follow Up Sent", "displayName": "Follow Up Sent", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": true},
+            {"id": "row_number", "displayName": "row_number", "required": false, "defaultMatch": false, "display": true, "type": "number", "canBeUsedToMatch": true, "readOnly": true, "removed": true}
           ],
           "attemptToConvertTypes": false,
           "convertFieldsToString": false
@@ -340,33 +194,27 @@
       },
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
-      "position": [
-        656,
-        -48
-      ],
-      "id": "a0380968-5a0b-48e8-8b1d-b2349d00d52a",
+      "position": [656, -48],
+      "id": "YOUR_NODE_ID_6",
       "name": "Status: Contacted",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "YfI8EKJbdWJDB1K9",
+          "id": "YOUR_SHEETS_CREDENTIAL_ID",
           "name": "Google Sheets OAuth2 API"
         }
       }
     },
     {
       "parameters": {
-        "amount": 24,
+        "amount": 48,
         "unit": "hours"
       },
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
-      "position": [
-        864,
-        -48
-      ],
-      "id": "17669551-d809-4384-87ea-732e16a770a1",
-      "name": "Wait — 24 Hours",
-      "webhookId": "659cb8d8-7fb7-4de5-a02a-4efdf0c21a15"
+      "position": [864, -48],
+      "id": "YOUR_NODE_ID_7",
+      "name": "Wait — 48 Hours",
+      "webhookId": "YOUR_WEBHOOK_ID_4"
     },
     {
       "parameters": {
@@ -377,16 +225,13 @@
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
-      "position": [
-        1072,
-        -48
-      ],
-      "id": "ad796c2b-b82b-4928-8cbf-6a14dd569100",
+      "position": [1072, -48],
+      "id": "YOUR_NODE_ID_8",
       "name": "Send Follow Up",
-      "webhookId": "b9b53bc4-17a4-4dee-9851-a38a206afd25",
+      "webhookId": "YOUR_WEBHOOK_ID_5",
       "credentials": {
         "gmailOAuth2": {
-          "id": "3W6hYH3ijBApwS8d",
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
           "name": "Gmail account"
         }
       }
@@ -396,17 +241,17 @@
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "16Uj8u4KqGT3SSzC5USC9FLFSokmqvgo-sGoOLol7cfE",
+          "value": "YOUR_SPREADSHEET_ID",
           "mode": "list",
           "cachedResultName": "Leads Tracker",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16Uj8u4KqGT3SSzC5USC9FLFSokmqvgo-sGoOLol7cfE/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Sheet1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16Uj8u4KqGT3SSzC5USC9FLFSokmqvgo-sGoOLol7cfE/edit#gid=0"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit#gid=0"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -415,89 +260,16 @@
             "Status": "Followed Up",
             "Follow Up Sent": "={{ $now.setZone('Africa/Lagos').toFormat('yyyy-MM-dd HH:mm') }}"
           },
-          "matchingColumns": [
-            "Email"
-          ],
+          "matchingColumns": ["Email"],
           "schema": [
-            {
-              "id": "Full Name",
-              "displayName": "Full Name",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "Email",
-              "displayName": "Email",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "Phone",
-              "displayName": "Phone",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "Timestamp",
-              "displayName": "Timestamp",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "Message",
-              "displayName": "Message",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "Status",
-              "displayName": "Status",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Follow Up Sent",
-              "displayName": "Follow Up Sent",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "row_number",
-              "displayName": "row_number",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true,
-              "readOnly": true,
-              "removed": true
-            }
+            {"id": "Full Name", "displayName": "Full Name", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": true},
+            {"id": "Email", "displayName": "Email", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false},
+            {"id": "Phone", "displayName": "Phone", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": true},
+            {"id": "Timestamp", "displayName": "Timestamp", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": true},
+            {"id": "Message", "displayName": "Message", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": true},
+            {"id": "Status", "displayName": "Status", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true},
+            {"id": "Follow Up Sent", "displayName": "Follow Up Sent", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true},
+            {"id": "row_number", "displayName": "row_number", "required": false, "defaultMatch": false, "display": true, "type": "number", "canBeUsedToMatch": true, "readOnly": true, "removed": true}
           ],
           "attemptToConvertTypes": false,
           "convertFieldsToString": false
@@ -506,15 +278,12 @@
       },
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
-      "position": [
-        1280,
-        -48
-      ],
-      "id": "4a016217-4f67-422c-abd6-4a48ae56cc98",
+      "position": [1280, -48],
+      "id": "YOUR_NODE_ID_9",
       "name": "Status: Followed Up",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "YfI8EKJbdWJDB1K9",
+          "id": "YOUR_SHEETS_CREDENTIAL_ID",
           "name": "Google Sheets OAuth2 API"
         }
       }
@@ -522,109 +291,20 @@
   ],
   "pinData": {},
   "connections": {
-    "On form submission- Receive Lead": {
-      "main": [
-        [
-          {
-            "node": "Log New Lead",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Log New Lead": {
-      "main": [
-        [
-          {
-            "node": "Notify Owner",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Notify Owner": {
-      "main": [
-        [
-          {
-            "node": "Gemini — Generate AI Reply",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Gemini — Generate AI Reply": {
-      "main": [
-        [
-          {
-            "node": "Send AI Reply to Lead",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Send AI Reply to Lead": {
-      "main": [
-        [
-          {
-            "node": "Status: Contacted",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Status: Contacted": {
-      "main": [
-        [
-          {
-            "node": "Wait — 24 Hours",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Wait — 24 Hours": {
-      "main": [
-        [
-          {
-            "node": "Send Follow Up",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Send Follow Up": {
-      "main": [
-        [
-          {
-            "node": "Status: Followed Up",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    }
+    "On form submission- Receive Lead": {"main": [[{"node": "Log New Lead", "type": "main", "index": 0}]]},
+    "Log New Lead": {"main": [[{"node": "Notify Owner", "type": "main", "index": 0}]]},
+    "Notify Owner": {"main": [[{"node": "Gemini — Generate AI Reply", "type": "main", "index": 0}]]},
+    "Gemini — Generate AI Reply": {"main": [[{"node": "Send AI Reply to Lead", "type": "main", "index": 0}]]},
+    "Send AI Reply to Lead": {"main": [[{"node": "Status: Contacted", "type": "main", "index": 0}]]},
+    "Status: Contacted": {"main": [[{"node": "Wait — 48 Hours", "type": "main", "index": 0}]]},
+    "Wait — 48 Hours": {"main": [[{"node": "Send Follow Up", "type": "main", "index": 0}]]},
+    "Send Follow Up": {"main": [[{"node": "Status: Followed Up", "type": "main", "index": 0}]]}
   },
   "active": false,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate",
-    "timeSavedMode": "fixed",
-    "errorWorkflow": "ke0zEXshZiOPFsH1",
-    "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false
+    "errorWorkflow": "YOUR_ERROR_WORKFLOW_ID"
   },
-  "versionId": "79bc4988-20d9-4b58-ae3e-fb79f00f4849",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "afcf979e49c9ca50564522db1d64bb4822881cce72e0e4fd5b73cef04a7eb3b2"
-  },
-  "id": "351gL1tDRdZz99Yj",
+  "id": "YOUR_WORKFLOW_ID",
   "tags": []
 }
