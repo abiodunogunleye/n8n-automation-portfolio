@@ -1,0 +1,490 @@
+{
+  "name": "AI Enquiry Classifier — Estate Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-enquiry",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -736,
+        -16
+      ],
+      "id": "800c4df6-27ca-4a95-96af-bfb523f1753b",
+      "name": "Webhook",
+      "webhookId": "YOUR_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_GEMINI_API_KEY",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"You are an intent classification assistant for a UK estate management company. Read the WhatsApp message and classify it into EXACTLY ONE category.\\n\\nVALID CATEGORIES:\\n- SALES ENQUIRY\\n- RENTAL ENQUIRY\\n- COMPLAINT\\n- URGENT\\n- SPAM\\n\\nCATEGORY DEFINITIONS:\\n\\n1. SALES ENQUIRY\\nUse this when the sender is interested in buying a property, viewing a property for purchase, asking for sale price/details, making an offer, or checking if a property for sale is still available.\\nExamples:\\n- I want to view the 3-bed house\\n- What's the price of the flat on Main Street?\\n- Is this property still available?\\n- I'd like to make an offer\\n- Can you send me details about this property?\\n\\n2. RENTAL ENQUIRY\\nUse this when the sender is interested in renting or leasing a property, asking about tenancy terms, move-in dates, rent availability, or letting applications.\\nExamples:\\n- Do you have any 2-bed flats available to rent?\\n- I'm looking for a property to let next month\\n- What are the rental terms?\\n- When can I move in?\\n- Is this property available for rent?\\n\\n3. COMPLAINT\\nUse this when the sender reports a maintenance issue, repair request, property defect, broken appliance, or non-life-threatening problem.\\nExamples:\\n- The boiler is broken, no hot water\\n- The kitchen tap is leaking\\n- There's a crack in the wall\\n- The bathroom tiles are damaged\\n- The front door lock doesn't work properly\\n- The heating isn't working well\\n- Paint is peeling in the bedroom\\n- The radiator is cold\\n- Damp on the walls\\n\\n4. URGENT\\nUse this when the message describes an emergency, dangerous situation, immediate safety risk, or issue requiring urgent same-day action.\\nExamples:\\n- There's flooding in the kitchen\\n- Fire in the living room\\n- The house has been broken into\\n- Gas leak, I smell gas\\n- Burst pipe, water everywhere\\n- No electricity / total power outage\\n- Carbon monoxide alarm going off\\n- Someone is threatening me / aggressive person here\\n- No heating and it's freezing cold\\n\\n5. SPAM\\nUse this when the message is irrelevant, promotional, unsolicited marketing, random, meaningless, or does not clearly fit the other categories.\\nExamples:\\n- Get cheap car insurance\\n- Click here for free mortgage advice\\n- Random promotional message\\n- Hey, check this out\\n\\nDECISION RULES:\\n- Choose URGENT over COMPLAINT whenever there is danger, active flooding, fire, gas leak, break-in, total power outage, burst pipe, carbon monoxide alert, threatening behaviour, or severe cold with no heating.\\n- Choose COMPLAINT for repairs, maintenance, defects, faulty appliances, damp, leaks, broken locks, poor heating, or similar non-emergency issues.\\n- Choose SALES ENQUIRY for buying, offers, sale viewings, sale availability, or property purchase questions.\\n- Choose RENTAL ENQUIRY for renting, leasing, lettings, tenancy, move-in, or rent availability.\\n- If the message is unclear, irrelevant, or does not fit the categories, choose SPAM.\\n- Always classify using the message content only.\\n- Ignore spelling mistakes, abbreviations, slang, or poor grammar.\\n- Do not explain your choice.\\n\\nOUTPUT RULES:\\n- Return ONLY one of these exact labels:\\n  SALES ENQUIRY\\n  RENTAL ENQUIRY\\n  COMPLAINT\\n  URGENT\\n  SPAM\\n- Return no extra words, punctuation, JSON, or explanation.\\n\\nMessage: {{ $json.body.Body }}\"\n        }\n      ]\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -512,
+        -16
+      ],
+      "id": "964bfcd9-6b1c-4f70-85a2-589f712d14ae",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.candidates[0].content.parts[0].text.trim() }}",
+                    "rightValue": "SALES ENQUIRY",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "5805f8c5-4198-40e7-a2c8-6a3273916832"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "9f568417-7120-4ca7-9a82-b55b9398fe13",
+                    "leftValue": "={{ $json.candidates[0].content.parts[0].text.trim() }}",
+                    "rightValue": "RENTAL ENQUIRY",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "61fb2409-fc2d-4e63-a206-70ef348270de",
+                    "leftValue": "={{ $json.candidates[0].content.parts[0].text.trim() }}",
+                    "rightValue": "COMPLAINT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "67be9a86-b4f0-4a2f-bbe3-9047335380d5",
+                    "leftValue": "={{ $json.candidates[0].content.parts[0].text.trim() }}",
+                    "rightValue": "URGENT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "cb0acd97-aec9-4838-adf2-e403904a2f0e",
+                    "leftValue": "={{ $json.candidates[0].content.parts[0].text.trim() }}",
+                    "rightValue": "SPAM",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -288,
+        -64
+      ],
+      "id": "9afe1e74-d5ac-447f-9e0a-35676243b894",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_SALES_EMAIL@gmail.com",
+        "subject": "=New Sales Enquiry from {{ $('Webhook').item.json.body.ProfileName }}",
+        "message": "=<div style=\"font-family: Arial, sans-serif; font-size: 15px; color: #333;\">\n  <h2 style=\"color: #0f766e;\">New Sales Enquiry</h2>\n  <p>A new sales enquiry has come in via WhatsApp.</p>\n  \n  <table style=\"border-collapse: collapse; width: 100%; margin-top: 12px;\">\n    <tr style=\"background-color: #f5f5f5;\">\n      <td style=\"padding: 10px; font-weight: bold; width: 140px;\">From</td>\n      <td style=\"padding: 10px;\">{{ $('Webhook').item.json.body.ProfileName }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding: 10px; font-weight: bold;\">WhatsApp</td>\n      <td style=\"padding: 10px;\">{{ $('Webhook').item.json.body.From }}</td>\n    </tr>\n    <tr style=\"background-color: #f5f5f5;\">\n      <td style=\"padding: 10px; font-weight: bold;\">Message</td>\n      <td style=\"padding: 10px;\">{{ $('Webhook').item.json.body.Body }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding: 10px; font-weight: bold;\">Classification</td>\n      <td style=\"padding: 10px; color: #0f766e; font-weight: bold;\">Sales Enquiry</td>\n    </tr>\n  </table>\n  \n  <p style=\"margin-top: 20px; color: #666;\">Please respond to this enquiry as soon as possible.</p>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -64,
+        -304
+      ],
+      "id": "1948b0c7-a6c5-445d-9205-ebe228515187",
+      "name": "Sales Enquiry",
+      "webhookId": "YOUR_WEBHOOK_ID",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_LETTINGS_EMAIL@gmail.com",
+        "subject": "=New Rental Enquiry from {{ $('Webhook').item.json.body.ProfileName }}",
+        "message": "=<div style=\"font-family: Arial, sans-serif; font-size: 15px; color: #333;\">\n  <h2 style=\"color: #0f766e;\">New Rental Enquiry</h2>\n  <p>A new rental enquiry has come in via WhatsApp.</p>\n  \n  <table style=\"border-collapse: collapse; width: 100%; margin-top: 12px;\">\n    <tr style=\"background-color: #f5f5f5;\">\n      <td style=\"padding: 10px; font-weight: bold; width: 140px;\">From</td>\n      <td style=\"padding: 10px;\">{{ $('Webhook').item.json.body.ProfileName }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding: 10px; font-weight: bold;\">WhatsApp</td>\n      <td style=\"padding: 10px;\">{{ $('Webhook').item.json.body.From }}</td>\n    </tr>\n    <tr style=\"background-color: #f5f5f5;\">\n      <td style=\"padding: 10px; font-weight: bold;\">Message</td>\n      <td style=\"padding: 10px;\">{{ $('Webhook').item.json.body.Body }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding: 10px; font-weight: bold;\">Classification</td>\n      <td style=\"padding: 10px; color: #0f766e; font-weight: bold;\">Rental Enquiry</td>\n    </tr>\n  </table>\n  \n  <p style=\"margin-top: 20px; color: #666;\">Please respond to this enquiry as soon as possible.</p>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -64,
+        -112
+      ],
+      "id": "1bbcc5de-d022-4e46-b5bd-bc94e7718759",
+      "name": "Rental Enquiry",
+      "webhookId": "YOUR_WEBHOOK_ID",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_ADMIN_EMAIL@gmail.com",
+        "subject": "=⚠️ New Complaint from {{ $('Webhook').item.json.body.ProfileName }}",
+        "message": "=<div style=\"font-family: Arial, sans-serif; font-size: 15px; color: #333;\">\n  <h2 style=\"color: #dc2626;\">New Complaint</h2>\n  <p style=\"background-color: #fee2e2; padding: 12px; border-left: 4px solid #dc2626; margin-bottom: 12px;\">This is a complaint - please handle with priority.</p>\n  \n  <table style=\"border-collapse: collapse; width: 100%; margin-top: 12px;\">\n    <tr style=\"background-color: #f5f5f5;\">\n      <td style=\"padding: 10px; font-weight: bold; width: 140px;\">From</td>\n      <td style=\"padding: 10px;\">{{ $('Webhook').item.json.body.ProfileName }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding: 10px; font-weight: bold;\">WhatsApp</td>\n      <td style=\"padding: 10px;\">{{ $('Webhook').item.json.body.From }}</td>\n    </tr>\n    <tr style=\"background-color: #f5f5f5;\">\n      <td style=\"padding: 10px; font-weight: bold;\">Message</td>\n      <td style=\"padding: 10px;\">{{ $('Webhook').item.json.body.Body }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding: 10px; font-weight: bold;\">Classification</td>\n      <td style=\"padding: 10px; color: #dc2626; font-weight: bold;\">Complaint</td>\n    </tr>\n  </table>\n  \n  <p style=\"margin-top: 20px; color: #666;\">Action required - please investigate and respond urgently.</p>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -64,
+        176
+      ],
+      "id": "a9ca002d-fd8a-4ee7-a425-31d086b2df48",
+      "name": "Complaint",
+      "webhookId": "YOUR_WEBHOOK_ID",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_DIRECTOR_EMAIL@gmail.com",
+        "subject": "=🚨 URGENT - IMMEDIATE ACTION REQUIRED: {{ $('Webhook').item.json.body.ProfileName }}",
+        "message": "=<div style=\"background-color: #fee2e2; padding: 16px; border-left: 6px solid #dc2626; margin-bottom: 16px; border-radius: 4px;\">\n  <p style=\"color: #7f1d1d; font-weight: bold; font-size: 16px;\">⚠️ THIS IS AN URGENT EMERGENCY - IMMEDIATE RESPONSE REQUIRED</p>\n</div>\n\n<div style=\"font-family: Arial, sans-serif; font-size: 15px; color: #333;\">\n  <h2 style=\"color: #dc2626;\">Urgent Emergency</h2>\n  \n  <table style=\"border-collapse: collapse; width: 100%; margin-top: 12px;\">\n    <tr style=\"background-color: #f5f5f5;\">\n      <td style=\"padding: 10px; font-weight: bold; width: 140px;\">From</td>\n      <td style=\"padding: 10px;\">{{ $('Webhook').item.json.body.ProfileName }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding: 10px; font-weight: bold;\">WhatsApp</td>\n      <td style=\"padding: 10px;\">{{ $('Webhook').item.json.body.From }}</td>\n    </tr>\n    <tr style=\"background-color: #f5f5f5;\">\n      <td style=\"padding: 10px; font-weight: bold;\">Message</td>\n      <td style=\"padding: 10px;\">{{ $('Webhook').item.json.body.Body }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding: 10px; font-weight: bold;\">Classification</td>\n      <td style=\"padding: 10px; color: #dc2626; font-weight: bold;\">URGENT</td>\n    </tr>\n  </table>\n  \n  <p style=\"margin-top: 20px; color: #dc2626; font-weight: bold;\">RESPOND IMMEDIATELY - THIS IS AN EMERGENCY</p>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -64,
+        368
+      ],
+      "id": "c8454d34-08d8-4e34-b876-faf4c4a5ba99",
+      "name": "Urgent",
+      "webhookId": "YOUR_WEBHOOK_ID",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_SPREADSHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Enquiry Classifier",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now.toFormat('yyyy-MM-dd HH:mm') }}",
+            "From": "={{ $('Webhook').item.json.body.From }}",
+            "Message": "={{ $('Webhook').item.json.body.Body }}",
+            "Classification": "={{ $('HTTP Request').item.json.candidates[0].content.parts[0].text.trim() }}",
+            "Routed To": "YOUR_EMAIL@gmail.com",
+            "Status": "New"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "From",
+              "displayName": "From",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Classification",
+              "displayName": "Classification",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Routed To",
+              "displayName": "Routed To",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        160,
+        -16
+      ],
+      "id": "98ca23d3-79d7-4308-bc25-0460ff70e780",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Sales Enquiry",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rental Enquiry",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Complaint",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Urgent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sales Enquiry": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rental Enquiry": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Complaint": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Urgent": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "tags": []
+}
