@@ -1,0 +1,343 @@
+{
+  "name": "AI Lead Scoring \u2014 Logistics (Form)",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Logistics Enquiry Form",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Full Name"
+            },
+            {
+              "fieldLabel": "Company Name"
+            },
+            {
+              "fieldLabel": "Phone Number"
+            },
+            {
+              "fieldLabel": "Message / Requirements",
+              "fieldType": "textarea"
+            },
+            {
+              "fieldLabel": "Timeline",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "ASAP"
+                  },
+                  {
+                    "option": "Next Week"
+                  },
+                  {
+                    "option": "Next Month"
+                  },
+                  {
+                    "option": "Flexible"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -864,
+        0
+      ],
+      "id": "form-trigger",
+      "name": "On form submission",
+      "webhookId": "REPLACE_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  return {\n    json: {\n      source: 'Website Form',\n      name: item.json['Full Name'] || 'Unknown',\n      company: item.json['Company Name'] || 'Not provided',\n      phone: item.json['Phone Number'] || 'Unknown',\n      message: item.json['Message / Requirements'] || '',\n      timeline: item.json.Timeline || 'Not specified'\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -656,
+        0
+      ],
+      "id": "extract-lead",
+      "name": "Extract Lead Data"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_OPENAI_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a lead scoring assistant for a UK logistics/3PL company. Score each lead 1-10. Base score 5. +2 for 5000+ units or recurring/ongoing contract. +2 for urgency (ASAP/urgent). +1 for clear service need (fulfilment/warehousing/distribution). +1 for enterprise/chain. -2 price-only. -1 one-off. -1 vague. Return ONLY valid JSON: {\\\"score\\\": NUMBER, \\\"reason\\\": \\\"max 15 words\\\"}\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Score this lead: Name={{ $json.name }} Company={{ $json.company }} Message={{ $json.message }} Timeline={{ $json.timeline }}\"\n    }\n  ],\n  \"temperature\": 0.3,\n  \"max_tokens\": 100\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -448,
+        0
+      ],
+      "id": "gpt-score",
+      "name": "GPT-4o Score"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = JSON.parse(items[0].json.choices[0].message.content);\nconst lead = $('Extract Lead Data').item.json;\n\nreturn [{\n  json: {\n    source: lead.source,\n    name: lead.name,\n    company: lead.company,\n    phone: lead.phone,\n    message: lead.message,\n    timeline: lead.timeline,\n    score: parsed.score,\n    reason: parsed.reason,\n    status: 'New'\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        0
+      ],
+      "id": "merge-score",
+      "name": "Extract Score & Merge"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.score }}",
+                    "rightValue": 8,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    },
+                    "id": "cond-hot"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Hot Leads"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.score }}",
+                    "rightValue": 5,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    },
+                    "id": "cond-warm"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Warm Leads"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.score }}",
+                    "rightValue": 5,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    },
+                    "id": "cond-cold"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Cold Leads"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -32,
+        0
+      ],
+      "id": "route-score",
+      "name": "Route by Score"
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL@example.com",
+        "subject": "=\ud83d\udea8 HOT LEAD: {{ $json.name }} (Score {{ $json.score }}/10)",
+        "message": "=<div style=\"font-family: Arial, sans-serif; background: #fff3cd; padding: 20px; border-left: 6px solid #ff6b6b; border-radius: 5px;\">\n  <h2 style=\"color: #ff6b6b; margin: 0 0 15px 0;\">\ud83d\udd25 HOT LEAD ALERT</h2>\n  <p><strong>Score:</strong> {{ $json.score }}/10</p>\n  <p><strong>Reason:</strong> {{ $json.reason }}</p>\n  <p><strong>Name:</strong> {{ $json.name }}</p>\n  <p><strong>Company:</strong> {{ $json.company }}</p>\n  <p><strong>Phone:</strong> {{ $json.phone }}</p>\n  <p><strong>Message:</strong> {{ $json.message }}</p>\n  <p><strong>Timeline:</strong> {{ $json.timeline }}</p>\n  <p style=\"color: #ff6b6b; font-weight: bold;\">ACTION: Contact this lead immediately!</p>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        -192
+      ],
+      "id": "email-alert",
+      "name": "Email Alert",
+      "webhookId": "REPLACE_WEBHOOK_ID_2"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "logistics leads"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.name }}",
+            "Phone": "={{ $json.phone }}",
+            "Company": "={{ $json.company }}",
+            "Source": "={{ $json.source }}",
+            "Timestamp": "={{ $now.toFormat('yyyy-MM-dd HH:mm') }}",
+            "Message": "={{ $json.message }}",
+            "Timeline": "={{ $json.timeline }}",
+            "Score": "={{ $json.score }}",
+            "Status": "={{ $json.status }}",
+            "Reason": "={{ $json.reason }}"
+          },
+          "matchingColumns": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        656,
+        16
+      ],
+      "id": "log-sheets",
+      "name": "Log All Leads to Sheets"
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Extract Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Lead Data": {
+      "main": [
+        [
+          {
+            "node": "GPT-4o Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT-4o Score": {
+      "main": [
+        [
+          {
+            "node": "Extract Score & Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Score & Merge": {
+      "main": [
+        [
+          {
+            "node": "Route by Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Score": {
+      "main": [
+        [
+          {
+            "node": "Email Alert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log All Leads to Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log All Leads to Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log All Leads to Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Alert": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
