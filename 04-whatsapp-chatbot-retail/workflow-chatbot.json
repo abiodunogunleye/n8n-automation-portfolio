@@ -1,0 +1,252 @@
+{
+  "name": "AI WhatsApp Chatbot \u2014 Retail Store",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-chatbot",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        0
+      ],
+      "id": "webhook-in",
+      "name": "WhatsApp Input",
+      "webhookId": "REPLACE_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Twilio sends form-encoded fields in the webhook body\nconst body = items[0].json.body || items[0].json;\n\nreturn [{\n  json: {\n    phoneNumber: body.From || 'Unknown',\n    customerName: body.ProfileName || 'Customer',\n    message: body.Body || ''\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -500,
+        0
+      ],
+      "id": "extract-msg",
+      "name": "Extract Message Data"
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Product Catalogue"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Products"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -280,
+        0
+      ],
+      "id": "read-products",
+      "name": "Read Products"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Consolidate all product rows into one catalogue string for the prompt\nconst products = $('Read Products').all().map(p => {\n  const j = p.json;\n  return `${j['Product Name']} - \\u00a3${j['Price']} (${j['Category']})`;\n}).join('\\n');\n\nreturn [{\n  json: {\n    phoneNumber: $('Extract Message Data').item.json.phoneNumber,\n    customerName: $('Extract Message Data').item.json.customerName,\n    message: $('Extract Message Data').item.json.message,\n    catalogue: products\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -60,
+        0
+      ],
+      "id": "build-context",
+      "name": "Build Product Context"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_OPENAI_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a friendly assistant for a UK African & Continental food store. Answer customer questions about products, prices and availability using ONLY the product list provided. Be warm, brief and use plain British English. If an item is not on the list, say it may not be in stock and invite them to ask about something else.\\n\\nProduct list:\\n\" + {{ JSON.stringify($json.catalogue) }}\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify($json.message) }}\n    }\n  ],\n  \"temperature\": 0.7,\n  \"max_tokens\": 200\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        160,
+        0
+      ],
+      "id": "gpt-reply",
+      "name": "GPT-4o Assistant"
+    },
+    {
+      "parameters": {
+        "jsCode": "const reply = items[0].json.choices[0].message.content;\n\nreturn [{\n  json: {\n    phoneNumber: $('Build Product Context').item.json.phoneNumber,\n    customerName: $('Build Product Context').item.json.customerName,\n    message: $('Build Product Context').item.json.message,\n    aiReply: reply\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        380,
+        0
+      ],
+      "id": "merge-reply",
+      "name": "Merge Data for Logging"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Product Catalogue"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Conversations",
+          "mode": "list",
+          "cachedResultName": "Conversations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Phone": "={{ $json.phoneNumber }}",
+            "Customer": "={{ $json.customerName }}",
+            "Message": "={{ $json.message }}",
+            "AI Reply": "={{ $json.aiReply }}",
+            "Timestamp": "={{ $now.toFormat('yyyy-MM-dd HH:mm') }}"
+          },
+          "matchingColumns": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        600,
+        0
+      ],
+      "id": "log-convo",
+      "name": "Log Conversation"
+    },
+    {
+      "parameters": {
+        "resource": "sms",
+        "operation": "send",
+        "from": "whatsapp:YOUR_TWILIO_NUMBER",
+        "to": "={{ $json.phoneNumber }}",
+        "toWhatsapp": true,
+        "message": "={{ $json.aiReply }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        820,
+        0
+      ],
+      "id": "send-reply",
+      "name": "Send WhatsApp Reply"
+    }
+  ],
+  "connections": {
+    "WhatsApp Input": {
+      "main": [
+        [
+          {
+            "node": "Extract Message Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Message Data": {
+      "main": [
+        [
+          {
+            "node": "Read Products",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Products": {
+      "main": [
+        [
+          {
+            "node": "Build Product Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Product Context": {
+      "main": [
+        [
+          {
+            "node": "GPT-4o Assistant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT-4o Assistant": {
+      "main": [
+        [
+          {
+            "node": "Merge Data for Logging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Data for Logging": {
+      "main": [
+        [
+          {
+            "node": "Log Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Conversation": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
