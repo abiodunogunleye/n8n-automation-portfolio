@@ -1,0 +1,236 @@
+{
+  "name": "Invoice Chaser - Automated Reminders",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Invoice Submission",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Client Name"
+            },
+            {
+              "fieldLabel": "Client Email",
+              "fieldType": "email"
+            },
+            {
+              "fieldLabel": "Invoice Amount",
+              "fieldType": "number"
+            },
+            {
+              "fieldLabel": "Invoice Date",
+              "fieldType": "date"
+            },
+            {
+              "fieldLabel": "Due Date",
+              "fieldType": "date"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -512,
+        0
+      ],
+      "id": "ecd5b421-15cb-40af-832d-c96dd93057ad",
+      "name": "Invoice Submission Form",
+      "webhookId": "REPLACE_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Invoices"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client Name": "={{ $json['Client Name'] }}",
+            "Invoice Amount": "={{ $json['Invoice Amount'] }}",
+            "Invoice Date": "={{ $json['Invoice Date'] }}",
+            "Due Date": "={{ $json['Due Date'] }}",
+            "Status": "Unpaid",
+            "Submitted": "={{ $now.toFormat('yyyy-MM-dd HH:mm') }}",
+            "Email": "={{ $json['Client Email'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice Amount",
+              "displayName": "Invoice Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice Date",
+              "displayName": "Invoice Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Due Date",
+              "displayName": "Due Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Submitted",
+              "displayName": "Submitted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -288,
+        0
+      ],
+      "id": "6bc7a475-5a2e-47a5-835e-62ceda17d2af",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -96,
+        0
+      ],
+      "id": "a4200ac2-2ca9-481f-a931-bd037cd7b07a",
+      "name": "Wait 5 Days",
+      "webhookId": "REPLACE_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "=Reminder: Invoice to {{ $json['Client Name'] }} due on {{ $json['Due Date'] }}",
+        "message": "=Hi {{ $json['Client Name'] }},\n\nThis is a friendly reminder that the invoice we sent you is now due.\n\nAmount: \u00a3{{ $json['Invoice Amount'] }}\nDue Date: {{ $json['Due Date'] }}\n\nPlease arrange payment at your earliest convenience. If you have any questions, let me know.\n\nThanks!",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        112,
+        0
+      ],
+      "id": "97325cd5-066a-4935-bf9e-ac5b4c5e1d52",
+      "name": "Send Reminder Email",
+      "webhookId": "REPLACE_WEBHOOK_ID",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Invoice Submission Form": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Wait 5 Days",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 5 Days": {
+      "main": [
+        [
+          {
+            "node": "Send Reminder Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}
