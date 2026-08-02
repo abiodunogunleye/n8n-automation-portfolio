@@ -9,38 +9,58 @@ Most business websites are static. A visitor wants to know "have you worked in m
 The Solution
 This project gives an AI agent an actual, structured knowledge base to search before it answers:
 
-A skills/portfolio document is chunked and embedded into a vector database (Qdrant)
-An AI agent in n8n receives visitor questions and searches that knowledge base for relevant context
+A skills/portfolio document is uploaded, chunked, embedded, and stored in a vector database (Qdrant)
+A separate chat-triggered AI agent receives visitor questions and searches that knowledge base for relevant context
 The agent answers using only what it retrieves — grounded in real data, with instructions to say so honestly if the knowledge base doesn't cover something
+Conversation memory keeps multi-turn chats coherent
 The whole stack is self-hosted, authenticated, and runs with zero public database exposure
 
 How It Works
-Visitor Question
+The workflow has two independent pipelines sharing one Qdrant collection:
+
+Ingestion (upload → store)
+Form Upload (Files)
     │
     ▼
-AI Agent (n8n)
+Qdrant Vector Store (insert mode)
+    │
+    ├── Default Data Loader (binary → text)
+    │       │
+    │       ▼
+    │   Recursive Character Text Splitter (500 char chunks, 150 overlap)
+    │
+    └── Embeddings (OpenAI)
+
+Retrieval (chat → answer)
+Chat Message Received
     │
     ▼
-Qdrant Vector Search (retrieves relevant knowledge base chunks)
+AI Agent (GPT-4.1-mini + conversation memory)
     │
     ▼
-AI Agent generates grounded answer
+Qdrant Vector Store (retrieve-as-tool mode)
+    │
+    └── Embeddings (OpenAI)
     │
     ▼
-Response to Visitor
+Grounded response back to the user
+
+Insert and retrieval are handled by two separate Qdrant Vector Store nodes in the same workflow — one dedicated to writing new documents in, the other exposed to the AI Agent as a callable retrieval tool. This is the standard n8n pattern for RAG: the two operations have different node configurations and shouldn't be combined into one.
 
 Tech Stack
-n8n (self-hosted) — AI agent orchestration and workflow logic
+n8n (self-hosted) — workflow orchestration, AI agent, and chat interface
 Qdrant (self-hosted, Docker) — vector database for semantic search
-Docker Compose — service orchestration alongside existing n8n/Caddy stack
+Docker Compose — service orchestration alongside the existing n8n/Caddy stack
 Caddy — reverse proxy, automatic HTTPS via Let's Encrypt
 Cloudflare — DNS management
-OpenAI Embeddings — text-to-vector conversion for the knowledge base
-LLM (via n8n AI Agent node) — response generation grounded in retrieved context
+OpenAI Embeddings — text-to-vector conversion for both ingestion and query
+OpenAI GPT-4.1-mini — response generation via the n8n AI Agent node
+Recursive Character Text Splitter — chunking (500 characters, 150 overlap)
 
 Key Notes
 Qdrant runs with no ports published to the internet — only reachable internally by n8n over the Docker network, with API key authentication as a second layer.
-The Qdrant dashboard is separately exposed behind its own subdomain, HTTPS, and Basic Auth for admin access only.
+The Qdrant dashboard is separately exposed behind its own subdomain, HTTPS, and Basic Auth for admin access only — kept fully apart from the application's internal traffic.
+Letting n8n auto-create the Qdrant collection (rather than pre-creating it manually) avoids a named-vector mismatch — n8n's Qdrant node writes to an unnamed default vector, so manually created named-vector collections aren't compatible.
 The AI agent's system prompt explicitly instructs it to search the knowledge base before answering and to admit when information isn't available — reducing hallucinated answers on factual details like pricing or project history.
 The knowledge base is a living document — updated and re-embedded as new projects and services are added.
 
@@ -50,18 +70,15 @@ Expand the knowledge base with individual project case studies, not just a singl
 Embed the chat widget directly into the agency website for live visitor use
 
 Files
-Coming soon: exported n8n workflow (ingestion pipeline + agent workflow)
+workflow-ai-skills-chatbot.json — the full n8n workflow (ingestion pipeline + RAG chat agent, import-ready; credential IDs and webhook IDs are placeholders — reconnect your own on import)
+Abiodun_Ogunleye_AI_Automation_Skills.pdf — the source knowledge base document
 
 Setup
-Self-host Qdrant via Docker Compose alongside your n8n instance
-Create a collection and let n8n auto-create it on first insert (avoids named-vector mismatches)
-Build an ingestion workflow: document → chunk → embed → insert into Qdrant
-Connect the Qdrant Vector Store node to an AI Agent node as a retrieval tool
-Write a system prompt that enforces retrieval-first, grounded answers
+Self-host Qdrant via Docker Compose alongside your n8n instance, with no ports published externally
+Import workflow-ai-skills-chatbot.json into n8n
+Reconnect your own Qdrant and OpenAI credentials on both Qdrant Vector Store nodes
+Let n8n auto-create the Qdrant collection on first insert run — don't pre-create it manually
+Upload your knowledge base document via the form trigger to populate the collection
+Activate the workflow and test via the chat trigger
 
 Part of a series of practical AI automations built for UK small businesses.
-Live demos: demos.abiodunogunleye.store
-Website: www.abiodunogunleye.store
-
-
-
