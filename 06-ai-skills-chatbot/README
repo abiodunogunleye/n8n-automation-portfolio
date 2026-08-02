@@ -1,0 +1,67 @@
+AI Skills & Portfolio Chatbot — RAG-Powered Assistant
+A self-hosted RAG (Retrieval-Augmented Generation) chatbot that answers questions about my skills, projects, and services in real time — pulled from a live knowledge base, not scripted or guessed.
+
+Built as a working example of the same AI agent + knowledge base pattern used in client-facing support and enquiry automations.
+
+The Problem
+Most business websites are static. A visitor wants to know "have you worked in my industry?" or "what does this cost?" and the only option is a contact form and a wait. There's no way to get a real, accurate answer immediately — and most FAQ chatbots just recite a fixed script instead of understanding the question.
+
+The Solution
+This project gives an AI agent an actual, structured knowledge base to search before it answers:
+
+A skills/portfolio document is chunked and embedded into a vector database (Qdrant)
+An AI agent in n8n receives visitor questions and searches that knowledge base for relevant context
+The agent answers using only what it retrieves — grounded in real data, with instructions to say so honestly if the knowledge base doesn't cover something
+The whole stack is self-hosted, authenticated, and runs with zero public database exposure
+
+How It Works
+Visitor Question
+    │
+    ▼
+AI Agent (n8n)
+    │
+    ▼
+Qdrant Vector Search (retrieves relevant knowledge base chunks)
+    │
+    ▼
+AI Agent generates grounded answer
+    │
+    ▼
+Response to Visitor
+
+Tech Stack
+n8n (self-hosted) — AI agent orchestration and workflow logic
+Qdrant (self-hosted, Docker) — vector database for semantic search
+Docker Compose — service orchestration alongside existing n8n/Caddy stack
+Caddy — reverse proxy, automatic HTTPS via Let's Encrypt
+Cloudflare — DNS management
+OpenAI Embeddings — text-to-vector conversion for the knowledge base
+LLM (via n8n AI Agent node) — response generation grounded in retrieved context
+
+Key Notes
+Qdrant runs with no ports published to the internet — only reachable internally by n8n over the Docker network, with API key authentication as a second layer.
+The Qdrant dashboard is separately exposed behind its own subdomain, HTTPS, and Basic Auth for admin access only.
+The AI agent's system prompt explicitly instructs it to search the knowledge base before answering and to admit when information isn't available — reducing hallucinated answers on factual details like pricing or project history.
+The knowledge base is a living document — updated and re-embedded as new projects and services are added.
+
+Roadmap
+Hybrid search (dense + sparse vectors) for improved accuracy on exact-match queries like pricing and project names
+Expand the knowledge base with individual project case studies, not just a single summary document
+Embed the chat widget directly into the agency website for live visitor use
+
+Files
+Coming soon: exported n8n workflow (ingestion pipeline + agent workflow)
+
+Setup
+Self-host Qdrant via Docker Compose alongside your n8n instance
+Create a collection and let n8n auto-create it on first insert (avoids named-vector mismatches)
+Build an ingestion workflow: document → chunk → embed → insert into Qdrant
+Connect the Qdrant Vector Store node to an AI Agent node as a retrieval tool
+Write a system prompt that enforces retrieval-first, grounded answers
+
+Part of a series of practical AI automations built for UK small businesses.
+Live demos: demos.abiodunogunleye.store
+Website: www.abiodunogunleye.store
+
+
+
